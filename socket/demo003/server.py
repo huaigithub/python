@@ -1,24 +1,16 @@
 #!/usr/bin/env python3
 #coding=utf-8
 
-import socket,os
+import socket,os,SocketServer
 
-HOST=''
-PORT=8000
+class TCPHandler(SocketServer.BaseRequestHandler):
+    def handle(self):
+        self.data = self.request.recv(1024).strip()
+        print "{} wrote:", format(self.client_address[0])
+        self.request.sendall(self.data.upper())
 
-s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind((HOST,PORT))
-s.listen(1)
-
-while 1:
-    conn,addr=s.accept()
-    print('Connected by', addr)
-    while 1:
-      cmd=conn.recv(1024)
-      print("the cmd is:",cmd)
-      if not cmd:break
-      cmd_result = os.popen(cmd).read()
-      conn.sendall(cmd_result)
-conn.close()
-
+if __name__ == "__main__":
+    HOST, PORT = "localhost", 9999
+    server = SocketServer.ThreadingTCPServer((HOST,PORT), TCPHandler)
+    server.serve_forever()
 
